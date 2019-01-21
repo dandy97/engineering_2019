@@ -22,23 +22,29 @@ typedef struct
   float           vx; // forward/back
   float           vy; // left/right
   float           vw; // rotate
-  float        		vx_offset;
+	float           vx_f;
+	float           vy_f;
+	float           vw_f;
+	float        		vx_offset;
   float        		vy_offset; 
 	float           vw_offset;
+  float        		vx_f_offset;
+  float        		vy_f_offset; 
+	float           vw_f_offset;
 	
-	float         	follow_gimbal;
-	float					writhe_speed_fac;
+	float         	follow_gyro;
+	float					  writhe_speed_fac;
   
 //  chassis_mode_e  ctrl_mode;
 //  chassis_mode_e  last_ctrl_mode;
 
-	float           wheel_pos_fdb[4];
-  float           wheel_pos_ref[4];
+	float           wheel_pos_fdb[6];
+  float           wheel_pos_ref[6];
 	
-  float           wheel_spd_fdb[4];
-  float           wheel_spd_ref[4];
+  float           wheel_spd_fdb[6];
+  float           wheel_spd_ref[6];
 	
-  int16_t         current[4];
+  int16_t         current[6];
 	float         	power_surplus;
   
 } chassis_t;

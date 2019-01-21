@@ -71,6 +71,7 @@ else if(val>=max)\
 /*			chassis info handle			 */
 void get_chassis_info(void);
 void send_chassis_motor_ctrl_message(int16_t chassis_cur[]);
+void send_front_chassis_motor_ctrl_message(int16_t chassis_cur[]);
 
 /*			gimbal  info handle		   */
 void get_gimbal_info(void);

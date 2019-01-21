@@ -20,10 +20,9 @@ void gimbal_task(void const * argument)
 {
 	handler_run_time++;
 	osSignalSet(info_get_task_t, GIMBAL_INFO_GET_SIGNAL);
-	
-	if(gim.ctrl_mode != GIMBAL_INIT)
+	if(handler_run_time > 1000)
 	{
-		osSignalSet(shoot_task_t, SHOT_TASK_EXE_SIGNAL);
+		gim.ctrl_mode = GIMBAL_NORMAL;
 	}
 	
 	gimbal_stack_surplus = uxTaskGetStackHighWaterMark(NULL);

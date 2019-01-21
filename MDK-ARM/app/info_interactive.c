@@ -17,16 +17,13 @@ ramp_t LRSpeedRamp = RAMP_GEN_DAFAULT;
 /*left wheel:4   right wheel:3 */
 void get_chassis_info(void)
 {
-	/* get gimbal and chassis relative angle */
-	chassis.follow_gimbal = moto_yaw.total_angle;
-
 	/* get chassis wheel fdb positin */
-  for (uint8_t i = 0; i < 4; i++)
+  for (uint8_t i = 0; i < 6; i++)
   {
     chassis.wheel_pos_fdb[i] = moto_chassis[i].total_angle/19.0f;
   }
   /* get chassis wheel fdb speed */
-  for (uint8_t i = 0; i < 4; i++)
+  for (uint8_t i = 0; i < 6; i++)
   {
     chassis.wheel_spd_fdb[i] = moto_chassis[i].filter_rate/19.0;
   }
@@ -40,9 +37,12 @@ void get_chassis_info(void)
 
 void send_chassis_motor_ctrl_message(int16_t chassis_cur[])
 {
-	//send_chassis_cur(1000,0,0,0);
-	 send_chassis_cur(chassis_cur[0] * chassis.power_surplus, chassis_cur[1] *chassis.power_surplus, 
-										chassis_cur[2] * chassis.power_surplus, chassis_cur[3] *chassis.power_surplus);
+	 send_chassis_cur(chassis_cur[0] ,chassis_cur[1] ,chassis_cur[2] ,chassis_cur[3]);
+}
+
+void send_front_chassis_motor_ctrl_message(int16_t chassis_cur[])
+{
+	 send_front_chaais_cur(chassis_cur[4] ,chassis_cur[5]);
 }
 
 /************************************* CHASSIS INFO ********************************************/
@@ -66,6 +66,7 @@ void get_gimbal_info(void)
 	}		
 	//get trig pos info
 	
+	chassis.follow_gyro = gyro_data.yaw;
 	/* get gimbal relative palstance */
   //the Z axis(yaw) of gimbal coordinate system corresponds to the IMU Z axis
   gim.sensor.yaw_palstance = gyro_data.v_z;
@@ -73,14 +74,6 @@ void get_gimbal_info(void)
   gim.sensor.pit_palstance = gyro_data.v_x;
 	
 	/* get remote and keyboard gimbal control information */
-}
-
-void send_gimbal_motor_ctrl_message(int16_t gimbal_cur[])
-{
-  /* 0: yaw motor current
-     1: pitch motor current
-     2: trigger motor current*/
-  send_gimbal_cur(-gimbal_cur[0], gimbal_cur[1], gimbal_cur[2]);
 }
 
 /************************************* GIMBAL  INFO *********************************************/
@@ -94,16 +87,11 @@ void remote_ctrl_chassis_hook(void)
 	if((gim.ctrl_mode != GIMBAL_INIT) && (ctrl_mode == REMOTE_CTRL))
 	{
 		/* get chassis wheel ref speed */
-		if(ramp_mode == RAMP_UP)
-		{
-			chassis.vx_offset = RC_CtrlData.rc.ch1 * 30.0f / 660;
-			chassis.vy_offset = RC_CtrlData.rc.ch0 * 30.0f / 660;
-		}
-		else
-		{
-			chassis.vx_offset = RC_CtrlData.rc.ch1 * CHASSIS_REF_FACT;
-			chassis.vy_offset = RC_CtrlData.rc.ch0 * CHASSIS_REF_FACT;
-		}
+		chassis.vx_offset = RC_CtrlData.rc.ch1 * CHASSIS_REF_FACT;
+		chassis.vy_offset = RC_CtrlData.rc.ch0 * CHASSIS_REF_FACT;
+		
+		chassis.vx_f_offset = RC_CtrlData.rc.ch3 * CHASSIS_REF_FACT;
+		chassis.vy_f_offset = RC_CtrlData.rc.ch2 * CHASSIS_REF_FACT;
 	}
 }
 
@@ -184,35 +172,4 @@ void keyboard_chassis_hook(void)
 	
 }
 
-/********************************* GIMBAL REMOTE  HANDLER ***************************************/
-void remote_ctrl_gimbal_hook(void)
-{
-	if((gim.ctrl_mode != GIMBAL_INIT) && (ctrl_mode == REMOTE_CTRL))
-		{					
-			/* get remote gimbal info */
-		  gim.pid.yaw_angle_ref -= RC_CtrlData.rc.ch2 * GIMBAL_YAW_REF_FACT;
-			gim.pid.pit_angle_ref += RC_CtrlData.rc.ch3 * GIMBAL_PIT_REF_FACT;
-		}
-}
-
-void keyboard_gimbal_hook(void)
-{	
-	if((gim.ctrl_mode != GIMBAL_INIT) && (ctrl_mode == KEYBOR_CTRL))
-	{
-		VAL_LIMIT(RC_CtrlData.mouse.x, -128, 128); 
-		VAL_LIMIT(RC_CtrlData.mouse.y, -18, 32);   
-		/* get remote gimbal info */
-		gim.pid.yaw_angle_ref -= RC_CtrlData.mouse.x * MOUSE_TO_YAW_ANGLE_INC_FACT  ;//+ shoot_buff_data.dynamic_yaw * 0.015f;
-		gim.pid.pit_angle_ref += RC_CtrlData.mouse.y * MOUSE_TO_PITCH_ANGLE_INC_FACT ;//+ shoot_buff_data.dynamic_pit * 0.015f;
-	}	
-	else
-	{
-		RC_CtrlData.mouse.x = 0;
-		RC_CtrlData.mouse.y = 0;
-	}
-	
-}
-
-/*********************************** SHOOT REMOTE  HANDLER **************************************/
-/*********************************** SHOOT REMOTE  HANDLER **************************************/
 

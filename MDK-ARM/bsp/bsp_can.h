@@ -19,8 +19,8 @@ typedef enum
   CAN_3508_M2_ID       = 0x202,
   CAN_3508_M3_ID       = 0x203,
   CAN_3508_M4_ID       = 0x204,
-  CAN_YAW_MOTOR_ID     = 0x205,
-  CAN_PIT_MOTOR_ID     = 0x206, 
+  CAN_3508_M5_ID       = 0x205,
+  CAN_3508_M6_ID       = 0x206, 
   
   CAN_CHASSIS_ALL_ID   = 0x200,
   CAN_GIMBAL_ALL_ID    = 0x1ff,
@@ -122,9 +122,9 @@ void get_moto_offset(moto_measure_t* ptr, CAN_HandleTypeDef* hcan);
 
 void send_gimbal_cur(int16_t yaw_iq, int16_t pit_iq, int16_t trigger_iq);
 void send_chassis_cur(int16_t iq1, int16_t iq2, int16_t iq3, int16_t iq4);
-void Send_Friction(uint32_t ID , uint8_t speed);
+void send_front_chaais_cur(int16_t iq1, int16_t iq2);
 void send_Gyro(uint8_t mode, uint16_t time);
-void send_shoot_cur(int16_t iq1, int16_t iq2, int16_t iq3);
+
 
 void gyro_data_receive(GYRO_DATA* gyro);
 void zitai_data_receive(GYRO_DATA* gyro);

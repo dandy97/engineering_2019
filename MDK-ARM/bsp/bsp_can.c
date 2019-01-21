@@ -3,27 +3,11 @@
 moto_measure_t moto_pit;
 moto_measure_t moto_yaw;
 moto_measure_t moto_trigger;
-moto_measure_t moto_chassis[4];
+moto_measure_t moto_chassis[6];
 shoot_moto_measure_t moto_friction[2];
 
-int16_t before_angle[50];
-int16_t hundred_ms = 0;
-
-int16_t niuju = 0;
 
 GYRO_DATA gyro_data;
-
-float pc_i;
-static float dt=0.002;//注意：dt的取值为kalman滤波器采样时间  
-static float angle, angle_dot;//角度和角速度  
-static float P[2][2] = {{ 1, 0 },  
-                 { 0, 1 }};  
-static float Pdot[4] ={ 0,0,0,0};  
-static float Q_angle=0.001, Q_gyro=0.005; //角度数据置信度,角速度数据置信度  
-static float R_angle=0.5 ,C_0 = 1;  
-static float q_bias, angle_err, PCt_0, PCt_1, _E, K_0, K_1, t;
-static float t_0,t_1 = 0;
-
 
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
@@ -36,40 +20,12 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 			case CAN_3508_M2_ID:
 			case CAN_3508_M3_ID:
 			case CAN_3508_M4_ID:
+			case CAN_3508_M5_ID:
+			case CAN_3508_M6_ID:
 			{
 				static uint8_t i;
 				i = hcan1.pRxMsg->StdId - CAN_3508_M1_ID;
 				moto_chassis[i].msg_cnt++ <= 50 ? get_moto_offset(&moto_chassis[i], &hcan1) : encoder_data_handler(&moto_chassis[i], &hcan1);
-			}
-			break;
-			case CAN_YAW_MOTOR_ID:
-			{
-//			  #if CAR_NUM == 5
-//				moto_yaw.offset_ecd = 7645;
-//				#elif CAR_NUM == 4
-//				moto_yaw.offset_ecd = 7645;
-//				#elif CAR_NUM == 1
-//				moto_yaw.offset_ecd = 1456;
-//				#endif
-				moto_yaw.offset_ecd = 2225;
-				encoder_data_handler1(&moto_yaw, &hcan1);//用encoder_data_handler1还是encoder_data_handler自己体会，无法言传
-//				moto_yaw.total_angle += 360;
-			}
-			break;
-			case CAN_PIT_MOTOR_ID:
-			{
-				#if CAR_NUM == 5
-				moto_pit.offset_ecd = 2374;
-				#elif CAR_NUM == 4
-				moto_pit.offset_ecd = 847;
-				#elif CAR_NUM == 1
-				moto_pit.offset_ecd = 5174;		
-				#endif
-				
-				encoder_data_handler(&moto_pit, &hcan1);
-				#if CAR_NUM == 1
-				moto_pit.total_angle += 360;				
-				#endif
 			}
 			break;
 			default:
@@ -88,19 +44,6 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 			case 101:
 			{
 				zitai_data_receive(&gyro_data);
-			}
-			break;
-			case CAN_3510_M1_ID:
-			case CAN_3508_M2_ID:
-			{
-				static uint8_t i;
-				i = hcan2.pRxMsg->StdId - CAN_3510_M1_ID;
-				encoder_data_handler2(&moto_friction[i], &hcan2);
-			}
-			break;
-			case CAN_TRIGGER_MOTOR_ID:
-			{
-				moto_trigger.msg_cnt++ <= 50 ? get_moto_offset(&moto_trigger, &hcan2) : encoder_data_handler1(&moto_trigger, &hcan2);
 			}
 			break;
 			default:
@@ -280,36 +223,6 @@ void get_moto_offset(moto_measure_t* ptr, CAN_HandleTypeDef* hcan)
 	*					get gyro angle
 	*/ 
 
-float Kalman_Filter(float angle_m, float gyro_m)//angleAx 和 gyroGy   
-{  
-        angle+=(gyro_m-q_bias) * dt;  
-        angle_err = angle_m - angle;  
-        Pdot[0]=Q_angle - P[0][1] - P[1][0];  
-        Pdot[1]= - P[1][1];  
-        Pdot[2]= - P[1][1];  
-        Pdot[3]=Q_gyro;  
-        P[0][0] += Pdot[0] * dt;  
-        P[0][1] += Pdot[1] * dt;  
-        P[1][0] += Pdot[2] * dt;  
-        P[1][1] += Pdot[3] * dt;  
-        PCt_0 = C_0 * P[0][0];  
-        PCt_1 = C_0 * P[1][0];  
-        _E = R_angle + C_0 * PCt_0;  
-        K_0 = PCt_0 / E;  
-        K_1 = PCt_1 / E;  
-        t_0 = PCt_0;  
-        t_1 = C_0 * P[0][1];  
-        P[0][0] -= K_0 * t_0;  
-        P[0][1] -= K_0 * t_1;  
-        P[1][0] -= K_1 * t_0;  
-        P[1][1] -= K_1 * t_1;  
-        angle += K_0 * angle_err; //最优角度  
-        q_bias += K_1 * angle_err;  
-        angle_dot = gyro_m-q_bias;//最优角速度  
-   
-        return angle;
-} 
-
 void zitai_data_receive(GYRO_DATA* gyro)
 {
 	static int16_t yaw_connt = 0;
@@ -346,8 +259,6 @@ void zitai_data_receive(GYRO_DATA* gyro)
 	gyro->last_yaw = gyro->yaw;
 	gyro->yaw = gyro->yaw_angle + yaw_connt * 360;
 	gyro->last_yaw_angle = gyro->yaw_angle;
-	
-	pc_i = Kalman_Filter(gyro->yaw, gyro->v_z);
 }
 
 /**
@@ -374,20 +285,20 @@ void can_receive_start(void)
   * @brief  send current which pid calculate to esc. message to calibrate 6025 gimbal motor esc
   * @param  current value corresponding motor(yaw/pitch/trigger)
   */
-void send_gimbal_cur(int16_t yaw_iq, int16_t pit_iq, int16_t trigger_iq)
+void send_front_chaais_cur(int16_t iq1, int16_t iq2)
 {
   hcan1.pTxMsg->StdId   = 0x1ff;
   hcan1.pTxMsg->IDE     = CAN_ID_STD;
   hcan1.pTxMsg->RTR     = CAN_RTR_DATA;
-  hcan1.pTxMsg->DLC     = 8;
+  hcan1.pTxMsg->DLC     = 4;
   /* adding minus due to clockwise rotation of the gimbal motor with positive current */
-  hcan1.pTxMsg->Data[0] = yaw_iq >> 8;
-  hcan1.pTxMsg->Data[1] = yaw_iq;
+  hcan1.pTxMsg->Data[0] = iq1 >> 8;
+  hcan1.pTxMsg->Data[1] = iq1;
   /* adding minus due to clockwise rotation of the gimbal motor with positive current */
-  hcan1.pTxMsg->Data[2] = pit_iq >> 8;
-  hcan1.pTxMsg->Data[3] = pit_iq;
-  hcan1.pTxMsg->Data[4] = trigger_iq >> 8;
-  hcan1.pTxMsg->Data[5] = trigger_iq;
+  hcan1.pTxMsg->Data[2] = iq2 >> 8;
+  hcan1.pTxMsg->Data[3] = iq2;
+  hcan1.pTxMsg->Data[4] = 0;
+  hcan1.pTxMsg->Data[5] = 0;
   hcan1.pTxMsg->Data[6] = 0;
   hcan1.pTxMsg->Data[7] = 0;
   HAL_CAN_Transmit(&hcan1, 10);
@@ -412,23 +323,6 @@ void send_chassis_cur(int16_t iq1, int16_t iq2, int16_t iq3, int16_t iq4)
   hcan1.pTxMsg->Data[6] = iq4 >> 8;
   hcan1.pTxMsg->Data[7] = iq4;
   HAL_CAN_Transmit(&hcan1, 10);
-}
-
-void send_shoot_cur(int16_t iq1, int16_t iq2, int16_t iq3)
-{
-  hcan2.pTxMsg->StdId   = 0x200;
-  hcan2.pTxMsg->IDE     = CAN_ID_STD;
-  hcan2.pTxMsg->RTR     = CAN_RTR_DATA;
-  hcan2.pTxMsg->DLC     = 0x06;
-  hcan2.pTxMsg->Data[0] = iq1 >> 8;
-  hcan2.pTxMsg->Data[1] = iq1;
-  hcan2.pTxMsg->Data[2] = iq2 >> 8;
-  hcan2.pTxMsg->Data[3] = iq2;
-  hcan2.pTxMsg->Data[4] = iq3 >> 8;
-  hcan2.pTxMsg->Data[5] = iq3;
-	hcan2.pTxMsg->Data[6] = 0;
-	hcan2.pTxMsg->Data[7] = 0;
-  HAL_CAN_Transmit(&hcan2, 10);
 }
 
 void send_Gyro(uint8_t mode, uint16_t time)

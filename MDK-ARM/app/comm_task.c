@@ -18,16 +18,10 @@ void can_msg_send_task(void const *argument)
     {
       if (event.value.signals & CHASSIS_MOTOR_MSG_SEND)
       {
-        //send_chassis_motor_ctrl_message(glb_cur.chassis_cur);
-				if(handler_run_time < 2000) {
-					send_Gyro(0x30,1000); /*校准陀螺仪*/
-				}
+        send_chassis_motor_ctrl_message(glb_cur.chassis_cur);
+				send_front_chassis_motor_ctrl_message(glb_cur.chassis_cur);
+//				if(handler_run_time < 2000) send_Gyro(0x30,1000); /*校准陀螺仪*/
       }
-			else if (event.value.signals & GIMBAL_MOTOR_MSG_SEND)
-      {
-				//send_gimbal_motor_ctrl_message(glb_cur.gimbal_cur);
-      }
-		
     }
 		can_send_surplus = uxTaskGetStackHighWaterMark(NULL);
 	}

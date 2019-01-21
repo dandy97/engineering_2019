@@ -9,7 +9,6 @@ chassis_t chassis = {0};
 
 uint32_t chassis_time_last;
 int chassis_time_ms;
-static float d_theta = 0;
 extern ramp_t FBSpeedRamp;
 extern ramp_t LRSpeedRamp;
 extern TaskHandle_t can_msg_seng_task_t;
@@ -27,41 +26,33 @@ void chassis_task(void const *argument)
 	}
 	else if(gim.ctrl_mode == GIMBAL_NORMAL)
 	{
-		chassis.vw = pid_calc(&pid_rotate, chassis.follow_gimbal, 0);
+		//	ChassisSpeedRef.rotate_ref = (int16_t)(Robot_angle_ref -gyro_data.yaw )*2;
+		chassis.vw = (chassis.follow_gyro - gyro_data.yaw) * 2;
 	}
 	
-/* run straight line with waist */
-	if(chassis.follow_gimbal < 0){
-		d_theta = chassis.follow_gimbal - 0;//rad
-	}
-	else if(chassis.follow_gimbal <= 0+ 180 ){
-		d_theta = chassis.follow_gimbal - 0;
-	}
-	else if(chassis.follow_gimbal <= 360){
-		d_theta = 360 - chassis.follow_gimbal + 0;
-	}
-	d_theta /= -57.295;
+	chassis.vx = chassis.vx_offset;
+	chassis.vy = chassis.vy_offset;
 	
-	chassis.vx = chassis.vx_offset * cos(d_theta) - chassis.vy_offset * sin(d_theta);
-	chassis.vy = chassis.vx_offset * sin(d_theta) + chassis.vy_offset * cos(d_theta);
-	
-	//chassis.vw = 0;
+	chassis.vx_f =  chassis.vx_f_offset;
+	chassis.vy_f =  chassis.vy_f_offset;
 	
 	chassis.wheel_spd_ref[0] = -chassis.vx + chassis.vy + chassis.vw;
 	chassis.wheel_spd_ref[1] =  chassis.vx + chassis.vy + chassis.vw;
 	chassis.wheel_spd_ref[2] = -chassis.vx - chassis.vy + chassis.vw;
 	chassis.wheel_spd_ref[3] =  chassis.vx - chassis.vy + chassis.vw;
+	chassis.wheel_spd_ref[4] = -chassis.vx_f + chassis.vy_f + chassis.vw_f;
+	chassis.wheel_spd_ref[5] =  chassis.vx_f + chassis.vy_f + chassis.vw_f;
 	
 
 	if(gim.stop == 1)//如果失去遥控信后后底盘不动
 	{
-			for(int i =0; i < 4; i++)
+			for(int i =0; i < 6; i++)
 		{
 			chassis.wheel_spd_ref[i] = 0;
 		}
 	}
 
-	for(int i =0; i < 4; i++)
+	for(int i =0; i < 6; i++)
 	{
 		chassis.current[i] = chassis_pid_calc(&pid_spd[i], chassis.wheel_spd_fdb[i], chassis.wheel_spd_ref[i]);
 	}

@@ -3,7 +3,6 @@
 UBaseType_t info_stack_surplus;
 uint32_t info_time_last;
 int info_time_ms;
-extern float pc_i;
 extern uint8_t ka_dan[10];
 
 void info_get_task(void const *argument)
@@ -35,7 +34,6 @@ void info_get_task(void const *argument)
 				
 				taskEXIT_CRITICAL();
 				
-				Ni_Ming(0xf1,gyro_data.yaw, pc_i,0,0);
 				//Ni_Ming(0xf1,moto_yaw.total_angle, moto_yaw.ecd, 0, 0);
 			}
 		}
