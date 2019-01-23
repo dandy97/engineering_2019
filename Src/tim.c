@@ -18,19 +18,17 @@ void MX_TIM4_Init(void)//控制舵机
   HAL_TIM_PWM_Init(&htim4);
 	
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-#if   CAR_NUM == 1
-	sConfigOC.Pulse = 2350;
-#elif CAR_NUM == 4
-	sConfigOC.Pulse = 1766;
-#else
-	sConfigOC.Pulse = 2150;
-#endif
+	sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
  
 	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
+	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2);
+	HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_3);
 	
   HAL_TIM_MspPostInit(&htim4);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1); 
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2); 
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3); //前轮气缸
 }
 
 /* TIM5 1ms interrupt init function */
@@ -130,8 +128,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
 		__HAL_RCC_GPIOD_CLK_ENABLE();	
     GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
   }

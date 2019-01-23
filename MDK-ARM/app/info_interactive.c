@@ -91,7 +91,7 @@ void remote_ctrl_chassis_hook(void)
 		chassis.vy_offset = RC_CtrlData.rc.ch0 * CHASSIS_REF_FACT;
 		
 		chassis.vx_f_offset = RC_CtrlData.rc.ch3 * CHASSIS_REF_FACT;
-		chassis.vy_f_offset = RC_CtrlData.rc.ch2 * CHASSIS_REF_FACT;
+		Robot_angle_ref -= RC_CtrlData.rc.ch2 * CHASSIS_REF_FACT *  0.02;
 	}
 }
 
@@ -102,41 +102,46 @@ void keyboard_chassis_hook(void)
 	if((gim.ctrl_mode != GIMBAL_INIT) && (ctrl_mode == KEYBOR_CTRL))
 	{
 		/*********** speed mode: normal speed/high speed ***********/                   
-		if(ramp_mode == RAMP_UP)
-		{
-			forward_back_speed = 30.0f;
-			left_right_speed   = 30.0f;
-		}
-		else if(RC_CtrlData.key.v & SHIFT)																	
+
+		if(RC_CtrlData.key.v & SHIFT)																	
 		{
 			forward_back_speed = HIGH_FORWARD_BACK_SPEED;
 			left_right_speed 	 = HIGH_LEFT_RIGHT_SPEED;
 		}
-		else if(gim.ctrl_mode == GIMBAL_WRITHE)
-		{
-			forward_back_speed = 40.0f;
-			left_right_speed 	 = 30.0f;
-		}
 		else
 		{
-			forward_back_speed = NORMAL_FORWARD_BACK_SPEED;
-			left_right_speed   = NORMAL_LEFT_RIGHT_SPEED;
+			forward_back_speed = HIGH_FORWARD_BACK_SPEED;
+			left_right_speed   = HIGH_LEFT_RIGHT_SPEED;
 		}
 		
 		/*********** get forward chassis wheel ref speed ***********/
 		if(RC_CtrlData.key.v & W)
 		{
-			chassis.vx_offset =  forward_back_speed * ramp_calc(&FBSpeedRamp);
+			chassis.vx_offset  = chassis.vx_f_offset =  forward_back_speed * ramp_calc(&FBSpeedRamp);
 		}
 		else if(RC_CtrlData.key.v & S)
 		{
-			chassis.vx_offset = -forward_back_speed * ramp_calc(&FBSpeedRamp);
+			chassis.vx_offset = chassis.vx_f_offset =  -forward_back_speed * ramp_calc(&FBSpeedRamp);
 		}
 		else
 		{
-			chassis.vx_offset = 0;
+			chassis.vx_offset = chassis.vx_f_offset = 0;
 			ramp_init(&FBSpeedRamp, MOUSR_FB_RAMP_TICK_COUNT);
 		}
+		
+//		if(RC_CtrlData.key.v & G)
+//		{
+//			chassis.vx_f_offset =  forward_back_speed * ramp_calc(&FBSpeedRamp);
+//		}
+//		else if(RC_CtrlData.key.v & B)
+//		{
+//			chassis.vx_f_offset = -forward_back_speed * ramp_calc(&FBSpeedRamp);
+//		}
+//		else
+//		{
+//			chassis.vx_f_offset = 0;
+//			ramp_init(&FBSpeedRamp, MOUSR_FB_RAMP_TICK_COUNT);
+//		}
 		
 		/*********** get rightward chassis wheel ref speed ***********/
 		if(RC_CtrlData.key.v & A)
@@ -154,18 +159,31 @@ void keyboard_chassis_hook(void)
 		}
 		
 		/*********** chassis mode is waist ***********/
-		if((RC_CtrlData.key.v & CTRL) && (handler_run_time -turn_time_last>350))																
+		if((RC_CtrlData.key.v & X) && (handler_run_time -turn_time_last>350))																
 		{
 			turn_time_last = handler_run_time;
-			
-			if(gim.ctrl_mode == GIMBAL_NORMAL)
-			{	
-				gim.ctrl_mode = GIMBAL_WRITHE;
-			}
+			if(TIM4->CCR3 == 20000)
+				TIM4->CCR3 = 0;
 			else
-			{
-				gim.ctrl_mode = GIMBAL_NORMAL;
-			}
+				TIM4->CCR3 = 20000;
+		}
+		
+		if((RC_CtrlData.key.v & C) && (handler_run_time -turn_time_last>350))																
+		{
+			turn_time_last = handler_run_time;
+			if(TIM4->CCR2 == 20000)
+				TIM4->CCR2 = 0;
+			else
+				TIM4->CCR2 = 20000;
+		}
+		
+		if((RC_CtrlData.key.v & V) && (handler_run_time -turn_time_last>350))																
+		{
+			turn_time_last = handler_run_time;
+			if(TIM4->CCR1 == 20000)
+				TIM4->CCR1 = 0;
+			else
+				TIM4->CCR1 = 20000;
 		}
 		
 	}

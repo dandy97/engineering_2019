@@ -26,8 +26,7 @@ void chassis_task(void const *argument)
 	}
 	else if(gim.ctrl_mode == GIMBAL_NORMAL)
 	{
-		//	ChassisSpeedRef.rotate_ref = (int16_t)(Robot_angle_ref -gyro_data.yaw )*2;
-		chassis.vw = (chassis.follow_gyro - gyro_data.yaw) * 2;
+		chassis.vw = (Robot_angle_ref - gyro_data.yaw) * 2;
 	}
 	
 	chassis.vx = chassis.vx_offset;
@@ -36,10 +35,18 @@ void chassis_task(void const *argument)
 	chassis.vx_f =  chassis.vx_f_offset;
 	chassis.vy_f =  chassis.vy_f_offset;
 	
-	chassis.wheel_spd_ref[0] = -chassis.vx + chassis.vy + chassis.vw;
-	chassis.wheel_spd_ref[1] =  chassis.vx + chassis.vy + chassis.vw;
-	chassis.wheel_spd_ref[2] = -chassis.vx - chassis.vy + chassis.vw;
-	chassis.wheel_spd_ref[3] =  chassis.vx - chassis.vy + chassis.vw;
+	if(fabs(chassis.vw) > 45)
+	{
+		if(chassis.vw > 0)
+			chassis.vw = 45;
+		else
+			chassis.vw = -45;
+	}
+	
+	chassis.wheel_spd_ref[0] = -chassis.vx + chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[1] =  chassis.vx + chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[2] = -chassis.vx - chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[3] =  chassis.vx - chassis.vy - (int16_t)chassis.vw;
 	chassis.wheel_spd_ref[4] = -chassis.vx_f + chassis.vy_f + chassis.vw_f;
 	chassis.wheel_spd_ref[5] =  chassis.vx_f + chassis.vy_f + chassis.vw_f;
 	
@@ -51,6 +58,7 @@ void chassis_task(void const *argument)
 			chassis.wheel_spd_ref[i] = 0;
 		}
 	}
+	
 
 	for(int i =0; i < 6; i++)
 	{
@@ -85,9 +93,9 @@ void chassis_param_init(void)
 //		0.001, 0, 0); 
 //	}
 	/* initializa chassis wheels speed pid */
-	 for (int k = 0; k < 4; k++)
+	 for (int k = 0; k < 6; k++)
   {
     PID_struct_init(&pid_spd[k], POSITION_PID, 8000, 0,
-		1800, 0, 0); 
+		600, 0, 0); 
 	}
 }

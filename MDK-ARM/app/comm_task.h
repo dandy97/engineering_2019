@@ -14,11 +14,7 @@
 typedef struct
 {
   /* 4 chassis motor current */
-  int16_t chassis_cur[4];
-  /* yaw/pitch motor current */
-  int16_t gimbal_cur[3];
-	/* friction/trigger motor current */
-	int16_t shoot_cur[3];
+  int16_t chassis_cur[6];
 } motor_current_t;
 
 void can_msg_send_task(void const *argument);

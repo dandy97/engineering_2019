@@ -34,7 +34,7 @@ void info_get_task(void const *argument)
 				
 				taskEXIT_CRITICAL();
 				
-				//Ni_Ming(0xf1,moto_yaw.total_angle, moto_yaw.ecd, 0, 0);
+				//Ni_Ming(0xf1,Robot_angle_ref, gyro_data.yaw, 0, 0);
 			}
 		}
 		

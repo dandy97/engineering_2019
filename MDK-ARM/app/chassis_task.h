@@ -53,5 +53,6 @@ void chassis_task(void const * argument);
 void chassis_param_init(void);
 
 extern chassis_t chassis;
+extern float Robot_angle_ref;
 
 #endif

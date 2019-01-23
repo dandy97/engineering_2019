@@ -155,8 +155,8 @@ pid_t pid_pit_spd				= {0};
 
 /* chassis pid*/
 pid_t pid_rotate        = {0};
-pid_t pid_pos[4]        = {0};
-pid_t pid_spd[4]        = {0};
+pid_t pid_pos[6]        = {0};
+pid_t pid_spd[6]        = {0};
 
 /* shoot pid  */
 pid_t pid_fric[2]       = {0};

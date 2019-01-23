@@ -1,8 +1,5 @@
 #include "main.h"
 
-moto_measure_t moto_pit;
-moto_measure_t moto_yaw;
-moto_measure_t moto_trigger;
 moto_measure_t moto_chassis[6];
 shoot_moto_measure_t moto_friction[2];
 

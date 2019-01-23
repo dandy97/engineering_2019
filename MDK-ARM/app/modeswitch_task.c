@@ -41,20 +41,26 @@ void mode_swtich_task(void const *arugment)
 
 void get_main_ctrl_mode(void)
 {
+	static int32_t ccr_1_q,ccr_2_q,ccr_3_q = 0;
 	static uint32_t last_Reset = 0;
 	
 	if((RC_CtrlData.rc.s2 == 1) || (RC_CtrlData.rc.s2 == 2))
 	{
 		ctrl_mode = REMOTE_CTRL;
+//		TIM4->CCR1 = ccr_1_q;
+//		TIM4->CCR2 = ccr_2_q;
+//		TIM4->CCR3 = ccr_3_q;
+		
 	}
 	else if(RC_CtrlData.rc.s2 == 3)
 	{	
 		ctrl_mode = KEYBOR_CTRL;
+//		TIM4->CCR3 = 20000;
 	}
 	
 	//每1S判断Reset与last_Reset 如果相等，说明没有收到遥控信号
 	//Reset在遥控处理函数里面
-	if(mode_switch_times % 400 == 0)
+	if(mode_switch_times % 20 == 0)
 	{
 		if(Reset == last_Reset)
 		{
@@ -65,7 +71,7 @@ void get_main_ctrl_mode(void)
 			gim.stop = 0;
 		}
 	}
-	if((mode_switch_times %200 == 0)  && (mode_switch_times %400 != 0))
+	if((mode_switch_times %10 == 0)  && (mode_switch_times %20 != 0))
 	{
 		last_Reset = Reset;
 	}

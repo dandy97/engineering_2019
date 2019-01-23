@@ -15,17 +15,23 @@ extern ramp_t yaw_ramp;
 extern TaskHandle_t can_msg_seng_task_t;
 extern TaskHandle_t shoot_task_t;
 extern TaskHandle_t info_get_task_t;
+float Robot_angle_ref;
 //static float pidin, ppidp, ppidi, ppidd, spidp, spidi, spidd = 0;
 void gimbal_task(void const * argument)
 {
 	handler_run_time++;
-	osSignalSet(info_get_task_t, GIMBAL_INFO_GET_SIGNAL);
+	if(gim.ctrl_mode == GIMBAL_INIT)
+	{
+		Robot_angle_ref = gyro_data.yaw;
+	}
+	
 	if(handler_run_time > 1000)
 	{
 		gim.ctrl_mode = GIMBAL_NORMAL;
 	}
 	
 	gimbal_stack_surplus = uxTaskGetStackHighWaterMark(NULL);
+	osSignalSet(info_get_task_t, GIMBAL_INFO_GET_SIGNAL);
 }
 
 void gimbal_param_init(void)

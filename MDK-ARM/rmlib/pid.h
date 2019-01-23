@@ -66,7 +66,7 @@ extern pid_t pid_fric[2];
 extern pid_t pid_fric_spd[2];
 
 extern pid_t pid_rotate;
-extern pid_t pid_pos[4];
-extern pid_t pid_spd[4];
+extern pid_t pid_pos[6];
+extern pid_t pid_spd[6];
 
 #endif
