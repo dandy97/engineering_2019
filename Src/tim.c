@@ -27,8 +27,7 @@ void MX_TIM4_Init(void)//控制舵机
 	
   HAL_TIM_MspPostInit(&htim4);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1); 
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2); 
-	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_3); //前轮气缸
+	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2); //前轮气缸
 }
 
 /* TIM5 1ms interrupt init function */

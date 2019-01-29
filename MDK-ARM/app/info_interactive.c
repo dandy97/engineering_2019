@@ -159,31 +159,23 @@ void keyboard_chassis_hook(void)
 		}
 		
 		/*********** chassis mode is waist ***********/
-		if((RC_CtrlData.key.v & X) && (handler_run_time -turn_time_last>350))																
-		{
-			turn_time_last = handler_run_time;
-			if(TIM4->CCR3 == 20000)
-				TIM4->CCR3 = 0;
-			else
-				TIM4->CCR3 = 20000;
-		}
 		
 		if((RC_CtrlData.key.v & C) && (handler_run_time -turn_time_last>350))																
-		{
-			turn_time_last = handler_run_time;
-			if(TIM4->CCR2 == 20000)
-				TIM4->CCR2 = 0;
-			else
-				TIM4->CCR2 = 20000;
-		}
-		
-		if((RC_CtrlData.key.v & V) && (handler_run_time -turn_time_last>350))																
 		{
 			turn_time_last = handler_run_time;
 			if(TIM4->CCR1 == 20000)
 				TIM4->CCR1 = 0;
 			else
 				TIM4->CCR1 = 20000;
+		}
+		
+		if((RC_CtrlData.key.v & V) && (handler_run_time -turn_time_last>350))																
+		{
+			turn_time_last = handler_run_time;
+			if(TIM4->CCR2 == 20000)
+				TIM4->CCR2 = 0;
+			else
+				TIM4->CCR2 = 20000;
 		}
 		
 	}
