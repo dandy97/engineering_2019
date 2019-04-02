@@ -84,14 +84,29 @@ static uint32_t turn_time_last = 0;
 
 void remote_ctrl_chassis_hook(void)
 {
-	if((gim.ctrl_mode != GIMBAL_INIT) && (ctrl_mode == REMOTE_CTRL))
-	{
+
 		/* get chassis wheel ref speed */
-		chassis.vx_offset = RC_CtrlData.rc.ch1 * CHASSIS_REF_FACT;
-		chassis.vy_offset = RC_CtrlData.rc.ch0 * CHASSIS_REF_FACT;
+	chassis.vx_offset = RC_CtrlData.rc.ch1 * CHASSIS_REF_FACT;
+	chassis.vy_offset = RC_CtrlData.rc.ch0 * CHASSIS_REF_FACT;
 		
-		chassis.vx_f_offset = RC_CtrlData.rc.ch3 * CHASSIS_REF_FACT;
-		Robot_angle_ref -= RC_CtrlData.rc.ch2 * CHASSIS_REF_FACT *  0.02;
+	chassis.vx_f_offset = RC_CtrlData.rc.ch3 * CHASSIS_REF_FACT;
+	Robot_angle_ref -= RC_CtrlData.rc.ch2 * CHASSIS_REF_FACT *  0.02;
+	
+	if(RC_CtrlData.rc.s2 == 1)
+	{
+		TIM4->CCR1 = 20000;
+	}
+	if(RC_CtrlData.rc.s2 == 3)
+	{
+		TIM4->CCR1 = 0;
+	}
+	if(RC_CtrlData.rc.s1 == 1)
+	{
+		TIM4->CCR2 = 20000;
+	}
+	if(RC_CtrlData.rc.s1 == 3)
+	{
+		TIM4->CCR2 = 0;
 	}
 }
 

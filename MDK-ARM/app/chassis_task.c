@@ -44,12 +44,12 @@ void chassis_task(void const *argument)
 	}
 	
 	
-	chassis.wheel_spd_ref[0] = -chassis.vx + chassis.vy - (int16_t)chassis.vw;
-	chassis.wheel_spd_ref[1] =  chassis.vx + chassis.vy - (int16_t)chassis.vw;
-	chassis.wheel_spd_ref[2] = -chassis.vx - chassis.vy - (int16_t)chassis.vw;
-	chassis.wheel_spd_ref[3] =  chassis.vx - chassis.vy - (int16_t)chassis.vw;
-	chassis.wheel_spd_ref[4] = -chassis.vx_f + chassis.vy_f + chassis.vw_f;
-	chassis.wheel_spd_ref[5] =  chassis.vx_f + chassis.vy_f + chassis.vw_f;
+	chassis.wheel_spd_ref[0] = chassis.vx - chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[1] = -chassis.vx - chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[2] = chassis.vx + chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[3] = -chassis.vx + chassis.vy - (int16_t)chassis.vw;
+	chassis.wheel_spd_ref[4] = chassis.vx_f;// - chassis.vy_f - chassis.vw_f;
+	chassis.wheel_spd_ref[5] = -chassis.vx_f;// - chassis.vy_f - chassis.vw_f;
 	
 
 	if(gim.stop == 1)//如果失去遥控信后后底盘不动
